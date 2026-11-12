@@ -1,15 +1,11 @@
-FROM debian:bookworm-slim
+FROM debian:trixie-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2
 LABEL Description="Image for running CppUTest with Clang"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Add LLVM and GitHub CLI apt repositories
+# Clang 19 comes from Debian itself; only the GitHub CLI needs a repository.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates gnupg wget \
-    && wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key \
-        | gpg --dearmor > /usr/share/keyrings/llvm-archive-keyring.gpg \
-    && echo "deb [signed-by=/usr/share/keyrings/llvm-archive-keyring.gpg] http://apt.llvm.org/bookworm/ llvm-toolchain-bookworm-19 main" \
-        > /etc/apt/sources.list.d/llvm.list \
     && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg \
         > /usr/share/keyrings/githubcli-archive-keyring.gpg \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
