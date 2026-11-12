@@ -1,5 +1,12 @@
+# The upstream trees and the built wolfSSL libraries, taken whole from the
+# cpputest-freertos host image so the Clang lane builds against exactly the
+# pins the GCC lane does. Those pins live in CppUTestFreertosDocker and nowhere
+# else. Renovate moves this digest when that image publishes (renovate.json);
+# the tag is the line it follows, and never what is pulled.
+FROM ghcr.io/cososo-ltd/cpputest-freertos:latest@sha256:879e29d63dd60253a46a03f43b0db8a8fcac24365cfdf5af06f3cce338b69888 AS upstreams
+
 FROM debian:trixie-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2
-LABEL Description="Image for running CppUTest with Clang"
+LABEL Description="Image for running CppUTest with Clang, with the upstream trees cpputest-freertos carries"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -56,6 +63,25 @@ RUN mkdir -p /home/src \
     && echo "${USERNAME} ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME} \
     && chmod 0440 /etc/sudoers.d/${USERNAME} \
     && chown -R ${USERNAME}:${USERNAME} /home/cpputest /home/legacy-build /home/src
+
+# Every tree under /opt, named by the variables cpputest-freertos sets. The
+# wolfSSL libraries are the GCC builds from the cpputest base: static C
+# libraries link the same from Clang, and what this image checks is the code
+# compiled against them. The smoke fails if a tree arrives here with no
+# variable naming it.
+COPY --from=upstreams --chown=${USER_UID}:${USER_GID} /opt/ /opt/
+ENV FREERTOS_KERNEL_PATH=/opt/freertos/kernel \
+    FREERTOS_PLUS_TCP_PATH=/opt/freertos/plus-tcp \
+    FREERTOS_PLUS_FAT_PATH=/opt/freertos/plus-fat \
+    LWIP_PATH=/opt/lwip \
+    FATFS_PATH=/opt/fatfs \
+    LITTLEFS_PATH=/opt/littlefs \
+    MBEDTLS_DIR=/opt/mbedtls \
+    WOLFSSL_DIR=/opt/wolfssl \
+    WOLFSSL_BASELINE_DIR=/opt/wolfssl-baseline \
+    WOLFSSL_SOURCE_DIR=/opt/wolfssl-src \
+    CMSIS_PATH=/opt/cmsis \
+    CMSIS_FREERTOS_PATH=/opt/cmsis-freertos
 
 USER ${USERNAME}
 
