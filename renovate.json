@@ -1,0 +1,42 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Bumps the digest of the Debian base in dockerfile and the SHA-pinned actions in the publish workflow. A green pull request merges itself; see README.md.",
+  "enabledManagers": [
+    "dockerfile",
+    "github-actions"
+  ],
+  "dependencyDashboard": true,
+  "automerge": true,
+  "automergeType": "pr",
+  "assignees": [
+    "DavidCozens"
+  ],
+  "semanticCommits": "enabled",
+  "semanticCommitType": "chore",
+  "semanticCommitScope": null,
+  "packageRules": [
+    {
+      "description": "A major never merges itself. A Debian major is a toolchain move, and a GitHub Action's major is where its inputs change, which a pull request cannot exercise for the login, push and notify steps that run only on main. Renovate assigns the pull request to the maintainer when it opens.",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    },
+    {
+      "description": "The Debian base is named by its tag and pinned by digest, so a refreshed trixie-slim is a digest update that rebuilds the image on it.",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchDepNames": [
+        "debian"
+      ],
+      "pinDigests": true,
+      "commitMessageTopic": "the Debian base"
+    }
+  ],
+  "dockerfile": {
+    "managerFilePatterns": [
+      "/^dockerfile$/"
+    ]
+  }
+}

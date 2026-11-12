@@ -1,0 +1,11 @@
+# CodeRabbit configuration.
+#
+# A Renovate bump moves a pinned digest or action, and the publishing workflow
+# builds and smokes the image on the pull request; a review would only
+# restate the digest. Skipping is by author, so the pull request stays skipped
+# after a hand-pushed fix. When a bump needed one, request the review with a
+# "@coderabbitai review" comment on the pull request.
+reviews:
+  auto_review:
+    ignore_usernames:
+      - "renovate[bot]"
