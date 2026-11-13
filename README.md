@@ -15,13 +15,35 @@ Companion to [CppUTestDocker](https://github.com/cososo-ltd/CppUTestDocker), whi
 - gdb, lcov
 - [GitHub CLI (`gh`)](https://cli.github.com/)
 - [James Grenning's legacy-build toolkit](https://github.com/jwgrenning/legacy-build)
+- The upstream source trees and the two wolfSSL builds that
+  [CppUTestFreertosDocker](https://github.com/cososo-ltd/CppUTestFreertosDocker)'s
+  host image carries, copied from it at the same paths under `/opt` with the same
+  variables: `FREERTOS_KERNEL_PATH`, `FREERTOS_PLUS_TCP_PATH`,
+  `FREERTOS_PLUS_FAT_PATH`, `LWIP_PATH`, `FATFS_PATH`, `LITTLEFS_PATH`,
+  `MBEDTLS_DIR`, `WOLFSSL_DIR`, `WOLFSSL_BASELINE_DIR`, `WOLFSSL_SOURCE_DIR`,
+  `CMSIS_PATH` and `CMSIS_FREERTOS_PATH`
+
+## Where the upstream pins live
+
+The upstream trees are not pinned here. The dockerfile's first stage is the
+`cpputest-freertos` host image, pinned by digest, and the image takes its `/opt`
+whole, so a Clang build and a GCC build of a project see the same upstream
+releases. The tag and SHA of each upstream, and the Renovate rules that move
+them, are in CppUTestFreertosDocker alone.
+
+The wolfSSL libraries are the GCC builds that image inherits from the
+`cpputest` base. They are static C libraries, which link the same from Clang;
+what this image checks is the code compiled against them, and that is compiled
+with Clang.
 
 ## Keeping the pins current
 
 [Renovate](https://docs.renovatebot.com/), installed on the organisation as
-the Mend GitHub App, opens a pull request when the digest the `FROM` line pins
-`debian:trixie-slim` at moves, and for the SHA-pinned actions in the
-publishing workflow. The publishing workflow builds the image on that pull
+the Mend GitHub App, opens a pull request when the digest either `FROM` line
+pins moves - `debian:trixie-slim`, or `cpputest-freertos` when that image
+publishes - and for the SHA-pinned actions in the publishing workflow. An
+upstream bump therefore reaches this image as a second pull request, after the
+one in CppUTestFreertosDocker has merged and published. The publishing workflow builds the image on that pull
 request and smokes it (see below). `renovate.json` holds the configuration.
 
 CodeRabbit skips a Renovate pull request (`.coderabbit.yaml`): the build on
@@ -59,7 +81,12 @@ image:
 
 - every tool listed above answers `--version`;
 - CppUTest builds, links and runs a one-test position-independent executable
-  with Clang from `CPPUTEST_HOME`.
+  with Clang from `CPPUTEST_HOME`;
+- every upstream variable names a directory, and every tree copied into `/opt`
+  is named by one of them, so a tree `cpputest-freertos` adds fails here until
+  this image exports its variable;
+- both wolfSSL builds carry the release of the wolfSSL source tree, and a
+  program calling them links and runs from Clang.
 
 Whether a project still compiles on a new image is that project's own CI's
 question, asked by the bump pull request the publish sends it.

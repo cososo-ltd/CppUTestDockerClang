@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Bumps the digest of the Debian base in dockerfile and the SHA-pinned actions in the publish workflow. A green pull request merges itself; see README.md.",
+  "description": "Bumps the digest of the Debian base in dockerfile, the digest it takes the cpputest-freertos upstream trees at, and the SHA-pinned actions in the publish workflow. A green pull request merges itself; see README.md.",
   "enabledManagers": [
     "dockerfile",
     "github-actions"
@@ -32,6 +32,19 @@
       ],
       "pinDigests": true,
       "commitMessageTopic": "the Debian base"
+    },
+    {
+      "description": "The upstream trees come from cpputest-freertos, named by its latest tag and pinned by digest, so a publish there is a digest update here; merging it moves this image onto the same pins as that one.",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchDepNames": [
+        "ghcr.io/cososo-ltd/cpputest-freertos"
+      ],
+      "matchUpdateTypes": [
+        "digest"
+      ],
+      "commitMessageTopic": "the cpputest-freertos upstream trees"
     }
   ],
   "dockerfile": {
