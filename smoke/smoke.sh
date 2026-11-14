@@ -3,7 +3,8 @@
 # bump changes, not any project built on the image: each tool answers, and
 # CppUTest builds, links and runs a test with Clang as a position-independent
 # executable; the trees copied from cpputest-freertos are each named by a
-# variable; and both wolfSSL libraries link and run from Clang. See README.md.
+# variable; both wolfSSL libraries link and run from Clang; and a program built
+# with source-based coverage and MC/DC links, runs and reports. See README.md.
 #
 # Usage, from the repository root:
 #   docker run --rm -v "$PWD:/smoke:ro" <image> /smoke/smoke/smoke.sh
@@ -15,7 +16,7 @@ trap 'rm -rf "${work}"' EXIT
 
 echo "== tools"
 for tool in cc c++ clang clang++ make cmake clang-format clang-tidy cppcheck \
-    include-what-you-use lcov gdb gh git; do
+    include-what-you-use llvm-cov llvm-profdata lcov gdb gh git; do
     version="$("${tool}" --version 2>&1 | sed -n 1p)" || {
         echo "${tool}: ${version}" >&2
         exit 1
@@ -86,5 +87,29 @@ for install in "${WOLFSSL_DIR}" "${WOLFSSL_BASELINE_DIR}"; do
     printf '%-22s ' "${install}"
     "${work}/wolfssl"
 done
+
+echo "== llvm-cov with MC/DC"
+cat > "${work}/mcdc.c" <<'SOURCE'
+#include <stdio.h>
+
+static int either(int a, int b)
+{
+    return a || b;
+}
+
+int main(int argc, char** argv)
+{
+    (void) argv;
+    printf("%d\n", either(argc > 1, argc > 2));
+    return 0;
+}
+SOURCE
+clang -Werror -fprofile-instr-generate -fcoverage-mapping -fcoverage-mcdc \
+    "${work}/mcdc.c" -o "${work}/mcdc"
+LLVM_PROFILE_FILE="${work}/mcdc.profraw" "${work}/mcdc" > /dev/null
+llvm-profdata merge -o "${work}/mcdc.profdata" "${work}/mcdc.profraw"
+llvm-cov report "${work}/mcdc" -instr-profile="${work}/mcdc.profdata" -show-mcdc-summary \
+    | tee "${work}/mcdc.report" | sed -n '1p;$p'
+grep -q "MC/DC Conditions" "${work}/mcdc.report"
 
 echo "== smoke passed"

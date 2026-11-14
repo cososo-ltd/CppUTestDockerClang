@@ -12,6 +12,7 @@ Companion to [CppUTestDocker](https://github.com/cososo-ltd/CppUTestDocker), whi
 - include-what-you-use 0.23 (built from source against clang-19; matched ABI is required for correct suggestions)
 - CMake
 - cppcheck
+- llvm-cov and llvm-profdata, with the compiler-rt profile runtime, for source-based coverage and MC/DC
 - gdb, lcov
 - [GitHub CLI (`gh`)](https://cli.github.com/)
 - [James Grenning's legacy-build toolkit](https://github.com/jwgrenning/legacy-build)

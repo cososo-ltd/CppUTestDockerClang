@@ -18,16 +18,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
         > /etc/apt/sources.list.d/github-cli.list \
     && apt-get update && apt-get install -y --no-install-recommends \
-    autoconf automake clang-19 clang-format-19 clang-tidy-19 cmake cppcheck gdb gh git lcov libclang-19-dev libssl-dev libtool llvm-19-dev make sudo zlib1g-dev \
+    autoconf automake clang-19 clang-format-19 clang-tidy-19 cmake cppcheck gdb gh git lcov libclang-19-dev libclang-rt-19-dev libssl-dev libtool llvm-19-dev make sudo zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Set clang-19 as the default cc, c++, clang-format, and clang-tidy
+# Set clang-19 as the default cc, c++, clang-format, clang-tidy, llvm-cov and llvm-profdata
 RUN update-alternatives --install /usr/bin/cc          cc          /usr/bin/clang-19        100 \
  && update-alternatives --install /usr/bin/c++         c++         /usr/bin/clang++-19      100 \
  && update-alternatives --install /usr/bin/clang       clang       /usr/bin/clang-19        100 \
  && update-alternatives --install /usr/bin/clang++     clang++     /usr/bin/clang++-19      100 \
  && update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-19 100 \
- && update-alternatives --install /usr/bin/clang-tidy  clang-tidy  /usr/bin/clang-tidy-19   100
+ && update-alternatives --install /usr/bin/clang-tidy  clang-tidy  /usr/bin/clang-tidy-19   100 \
+ && update-alternatives --install /usr/bin/llvm-cov    llvm-cov    /usr/bin/llvm-cov-19     100 \
+ && update-alternatives --install /usr/bin/llvm-profdata llvm-profdata /usr/bin/llvm-profdata-19 100
 
 # Build CppUTest with Clang, with -fPIC so it links cleanly into PIE executables
 WORKDIR /home/cpputest
