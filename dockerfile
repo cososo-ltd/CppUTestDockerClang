@@ -3,7 +3,7 @@
 # pins the GCC lane does. Those pins live in CppUTestFreertosDocker and nowhere
 # else. Renovate moves this digest when that image publishes (renovate.json);
 # the tag is the line it follows, and never what is pulled.
-FROM ghcr.io/cososo-ltd/cpputest-freertos:latest@sha256:879e29d63dd60253a46a03f43b0db8a8fcac24365cfdf5af06f3cce338b69888 AS upstreams
+FROM ghcr.io/cososo-ltd/cpputest-freertos:latest@sha256:952cb71a1bdf24d7845720eef68d9591ae61d18a515e3efa33ac858a0291e374 AS upstreams
 
 FROM debian:trixie-slim@sha256:8aa5a7bf5a1955bddbe7d74fcdd0b91ab30e74362a8b73af672b0481b35b44a0
 LABEL Description="Image for running CppUTest with Clang, with the upstream trees cpputest-freertos carries"
